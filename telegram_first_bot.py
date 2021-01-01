@@ -6,7 +6,7 @@ import telepot
 from telepot.loop import MessageLoop
 from telepot.delegate import pave_event_space, per_chat_id, create_open
 
-from utils.account_manager import AccountManager
+from utils.account_handler import AccountHandler
 from utils.torrent_handler import TorrentHandler
 
 
@@ -17,7 +17,7 @@ class CommandParser(telepot.helper.ChatHandler):
 		verified_chats_file = kwargs.pop('verified_chats_file')
 
 		super(CommandParser, self).__init__(*args, **kwargs)
-		self._account_manager = AccountManager(self.sender, email, password, verified_chats_file)
+		self._account_manager = AccountHandler(self.sender, email, password, verified_chats_file)
 		self._torrent_handler = TorrentHandler(self.sender)
 
 	def on__idle(self, event):

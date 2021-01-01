@@ -3,10 +3,10 @@ import json
 from telepot.helper import Sender
 
 from utils.utils import generate_pass
-from utils.email_handler import EmailHandler
+from utils.email_utils import EmailHandler
 
 
-class AccountManager:
+class AccountHandler:
     def __init__(self, sender: Sender, email: str, password: str, verified_chats_file: str):
         self._sender = sender
         self.listening = False
