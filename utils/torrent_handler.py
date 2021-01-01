@@ -33,6 +33,8 @@ class TorrentHandler:
             self._download_torrent()
         elif command == 'stop all':
             self._stop_all_torrents()
+        elif command == 'start all':
+            self._start_all_torrents()
         elif command == 'free space':
             self._check_free_space()
         else:
@@ -45,6 +47,7 @@ class TorrentHandler:
         help_txt += '   - download - Download new torrent\n'
         help_txt += '   - purge - Delete empty torrent folders\n'
         help_txt += '   - stop all - Stop all active torrents\n'
+        help_txt += '   - start all - Start all torrents\n'
         help_txt += '   - free space - Get free space on device\n'
         self._sender.sendMessage(help_txt)
 
@@ -86,16 +89,25 @@ class TorrentHandler:
         p = subprocess.Popen(['transmission-remote', '--authenv'] + params, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output, err = p.communicate()
 
+        output = output.decode("utf-8")
+        err = err.decode("utf-8")
+
         print(output)
         print(err)
 
-        if b'success' in output.lower() and len(err) == 0:
+        if 'success' in output.lower() and len(err) == 0:
             self._sender.sendMessage(f'Success!')
-            self._sender.sendMessage(f'Output message - {output}')
             self._sender.sendMessage(f'You can check the progress by going to http://10.0.0.17:9091')
         else:
             self._sender.sendMessage(f'Failed')
-            self._sender.sendMessage(f'Error message - {output}')
+
+        if len(output) > 0:
+            self._sender.sendMessage(f'Output message - {output}')
+
+        if len(err) > 0:
+            self._sender.sendMessage(f'Output message - {err}')
+
+
 
     def _download_torrent(self):
         self.listening = True
@@ -109,6 +121,10 @@ class TorrentHandler:
     def _stop_all_torrents(self):
         self._sender.sendMessage('Stopping all torrents')
         self._send_to_transmission(['--torrent', 'all', '--stop'])
+
+    def _start_all_torrents(self):
+        self._sender.sendMessage('Starting all torrents')
+        self._send_to_transmission(['--torrent', 'all', '--start'])
 
     def _check_free_space(self):
         usb_space = get_free_usb_space()
