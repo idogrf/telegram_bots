@@ -1,6 +1,6 @@
+import os
 import sys
 import time
-import argparse
 
 import telepot
 from telepot.loop import MessageLoop
@@ -71,23 +71,22 @@ class CommandParser(telepot.helper.ChatHandler):
 			self.sender.sendMessage(f"Sorry, I don't understand... please type /help for further options")
 
 
-if __name__ == '__main__':
+def run():
+	email = os.getenv('EMAIL_ADD')
+	password = os.getenv('EMAIL_PASS')
+	bot_token = os.getenv('TEL_BOT_TOKEN')
 
-	parser = argparse.ArgumentParser(description='Emergence count Report')
-
-	parser.add_argument('--token', type=str, required=True)
-	parser.add_argument('--email', type=str, required=True)
-	parser.add_argument('--password', type=str, required=True)
-	args = parser.parse_args()
-
-	bot = telepot.DelegatorBot(args.token, [pave_event_space()(per_chat_id(),
-															   create_open,
-															   CommandParser,
-															   timeout=30,
-															   email=args.email,
-															   password=args.password)])
+	bot = telepot.DelegatorBot(bot_token, [pave_event_space()(per_chat_id(),
+															  create_open,
+															  CommandParser,
+															  timeout=30,
+															  email=email,
+															  password=password)])
 	MessageLoop(bot).run_as_thread()
 	print('Listening...')
 
 	while 1:
 		time.sleep(10)
+
+if __name__ == '__main__':
+	run()
