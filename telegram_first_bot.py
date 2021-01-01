@@ -9,9 +9,6 @@ from telepot.delegate import pave_event_space, per_chat_id, create_open
 from utils.account_manager import AccountManager
 from utils.torrent_handler import TorrentHandler
 
-sys.path.append('/home/pi/projects/cronjobs')
-from download_torrents import run_torrent_download, delete_small_dirs
-
 
 class CommandParser(telepot.helper.ChatHandler):
 	def __init__(self, *args, **kwargs):
