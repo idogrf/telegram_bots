@@ -58,7 +58,7 @@ class AccountManager:
             self._sender.sendMessage('Please provide matching password (sent to email)')
         else:
             self._sender.sendMessage('Account already registered')
-:wq
+
     def _purge_chat_ids(self):
         self._save_verified_chat_ids([])
         self._sender.sendMessage('Accounts permissions purged')
