@@ -17,11 +17,14 @@ class CommandParser(telepot.helper.ChatHandler):
 		verified_chats_file = kwargs.pop('verified_chats_file')
 
 		super(CommandParser, self).__init__(*args, **kwargs)
-		self._account_manager = AccountHandler(self.sender, email, password, verified_chats_file)
+		self._account_handler = AccountHandler(self.sender, email, password, verified_chats_file)
 		self._torrent_handler = TorrentHandler(self.sender)
 
+		self._handlers = [self._account_handler, self._torrent_handler]
+		self._callers = [handler.caller for handler in self._handlers]
+
 	def on__idle(self, event):
-		if self._account_manager.listening:
+		if self._account_handler.listening:
 			self.sender.sendMessage('Time expired. please try again')
 		self.close()
 
@@ -35,10 +38,10 @@ class CommandParser(telepot.helper.ChatHandler):
 		print(f'Received msg - {msg_text}')
 		print(self.chat_id)
 
-		chat_id_verified = self._account_manager.verify_chat_id(self.chat_id)
+		chat_id_verified = self._account_handler.verify_chat_id(self.chat_id)
 
 		if msg_text == '/help':
-			self.sender.sendMessage(f"I can't help yet =/")
+			self._get_help()
 
 		elif msg_text == '/start':
 			self.sender.sendMessage(f"Hi! Welcome to Pi-Bot! For help type /help")
@@ -50,10 +53,10 @@ class CommandParser(telepot.helper.ChatHandler):
 				self._sender.sendMessage('User is not registered. Please register account using /acm register')
 
 		elif msg_text == '/acm register':
-			self._account_manager.generate_password(self.chat_id)
+			self._account_handler.generate_password(self.chat_id)
 
-		elif self._account_manager.listening:
-			self._account_manager.run_command(msg_text, self.chat_id)
+		elif self._account_handler.listening:
+			self._account_handler.run_command(msg_text, self.chat_id)
 
 		elif self._torrent_handler.listening:
 			self._torrent_handler.run_command(msg_text)
@@ -61,12 +64,12 @@ class CommandParser(telepot.helper.ChatHandler):
 		elif msg_text.lower().startswith(('hi', 'hello', 'hey')):
 			self.sender.sendMessage(f"Hi there! I'm PI bot :) how can I help?")
 
-		elif msg_text.startswith('/'):
+		elif msg_text.startswith(tuple(self._callers)):
 			if chat_id_verified:
-				if msg_text.startswith('/acm'):
-					self._account_manager.run_command(msg_text, self.chat_id)
+				if msg_text.startswith(self._account_handler.caller):
+					self._account_handler.run_command(msg_text, self.chat_id)
 
-				elif msg_text.startswith('/torrents'):
+				elif msg_text.startswith(self._torrent_handler.caller):
 					self._torrent_handler.run_command(msg_text)
 
 				else:
@@ -76,6 +79,13 @@ class CommandParser(telepot.helper.ChatHandler):
 
 		else:
 			self.sender.sendMessage(f"Sorry, I don't understand... please type /help for further options")
+
+	def _get_help(self):
+		help_txt = 'Welcome to PI Bot.\nUsage - \n'
+		help_txt += '   /status - Check current user status\n'
+		for handler in self._handlers:
+			help_txt += f'   {handler.caller} - {handler.description}\n'
+		self.sender.sendMessage(help_txt)
 
 
 def run():

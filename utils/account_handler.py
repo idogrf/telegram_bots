@@ -2,39 +2,56 @@ import os
 import json
 from telepot.helper import Sender
 
+from utils.handler import Handler
 from utils.utils import generate_pass
 from utils.email_utils import EmailHandler
 
 
-class AccountHandler:
+class AccountHandler(Handler):
     def __init__(self, sender: Sender, email: str, password: str, verified_chats_file: str):
-        self._sender = sender
+        super().__init__(sender)
+
         self.listening = False
         self._random_pass = None
         self._email_handler = EmailHandler(email, password)
         self._verified_chats_file = verified_chats_file
 
-    def run_command(self, msg_text, chat_id):
+    @property
+    def caller(self):
+        return '/acm'
+
+    @property
+    def description(self):
+        return f'Handles torrent related commands. type {self.caller} help for more information'
+
+    # Base class overloaded methods
+    def run_command(self, msg_text, chat_id=None, *args):
 
         if self.listening:
-            self._register_chat_id(msg_text, chat_id)
+            self._run_command_register(msg_text, chat_id)
             return
 
-        command = msg_text.lstrip('/acm').lstrip(' ')
+        self._process_command(msg_text)
 
-        if command == 'help':
-            self._get_help()
-        elif command == 'purge':
-            self._purge_chat_ids()
+    def _run_command_register(self, msg_text, chat_id):
+        """ Register user account for elevated permissions """
+        if msg_text == self._random_pass:
+            self.listening = False
+            self._random_pass = None
+
+            verified_chat_ids = self._get_verified_chats() + [chat_id]
+            self._save_verified_chat_ids(verified_chat_ids)
+
+            self._sender.sendMessage('Chat ID registered successfully!')
         else:
-            self._sender.sendMessage('Invalid command')
-            self._get_help()
+            self.listening = False
+            self._random_pass = None
+            self._sender.sendMessage('Password incorrect! Please try again!')
 
-    def _get_help(self):
-        help_txt = 'Account Manager module available commands - \n'
-        help_txt += '   - register - Register new account\n'
-        help_txt += '   - purge - Delete all accounts permission\n'
-        self._sender.sendMessage(help_txt)
+    def _run_command_purge(self):
+        """ Purge all user accounts """
+        self._save_verified_chat_ids([])
+        self._sender.sendMessage('Accounts permissions purged')
 
     def _get_verified_chats(self):
         if os.path.exists(self._verified_chats_file):
@@ -58,26 +75,8 @@ class AccountHandler:
         else:
             self._sender.sendMessage('Account already registered')
 
-    def _purge_chat_ids(self):
-        self._save_verified_chat_ids([])
-        self._sender.sendMessage('Accounts permissions purged')
-
     def _save_verified_chat_ids(self, verified_chat_ids):
         if not os.path.exists(os.path.dirname(self._verified_chats_file)):
             os.makedirs(os.path.dirname(self._verified_chats_file))
         with open(self._verified_chats_file, 'w') as f:
             json.dump({'chat_ids': verified_chat_ids}, f)
-
-    def _register_chat_id(self, msg_text, chat_id):
-        if msg_text == self._random_pass:
-            self.listening = False
-            self._random_pass = None
-
-            verified_chat_ids = self._get_verified_chats() + [chat_id]
-            self._save_verified_chat_ids(verified_chat_ids)
-
-            self._sender.sendMessage('Chat ID registered successfully!')
-        else:
-            self.listening = False
-            self._random_pass = None
-            self._sender.sendMessage('Password incorrect! Please try again!')
