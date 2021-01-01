@@ -7,11 +7,12 @@ from utils.email_handler import EmailHandler
 
 
 class AccountManager:
-    def __init__(self, sender: Sender, email: str, password: str):
+    def __init__(self, sender: Sender, email: str, password: str, verified_chats_file: str):
         self._sender = sender
         self.listening = False
         self._random_pass = None
         self._email_handler = EmailHandler(email, password)
+        self._verified_chats_file = verified_chats_file
 
     def run_command(self, msg_text, chat_id):
 
@@ -35,18 +36,16 @@ class AccountManager:
         help_txt += '   - purge - Delete all accounts permission\n'
         self._sender.sendMessage(help_txt)
 
-    @staticmethod
-    def _get_verified_chats():
-        if os.path.exists('verified_chat_ids.txt'):
-            with open('verified_chat_ids.txt', 'r') as f:
+    def _get_verified_chats(self):
+        if os.path.exists(self._verified_chats_file):
+            with open(self._verified_chats_file, 'r') as f:
                 verified = json.load(f)
             return verified['chat_ids']
         else:
             return []
 
-    @staticmethod
-    def verify_chat_id(chat_id):
-        chat_id_verified = chat_id in AccountManager._get_verified_chats()
+    def verify_chat_id(self, chat_id):
+        chat_id_verified = chat_id in self._get_verified_chats()
         return chat_id_verified
 
     def generate_password(self, chat_id):
@@ -63,9 +62,10 @@ class AccountManager:
         self._save_verified_chat_ids([])
         self._sender.sendMessage('Accounts permissions purged')
 
-    @staticmethod
-    def _save_verified_chat_ids(verified_chat_ids):
-        with open('verified_chat_ids.txt', 'w') as f:
+    def _save_verified_chat_ids(self, verified_chat_ids):
+        if not os.path.exists(os.path.dirname(self._verified_chats_file)):
+            os.makedirs(os.path.dirname(self._verified_chats_file))
+        with open(self._verified_chats_file, 'w') as f:
             json.dump({'chat_ids': verified_chat_ids}, f)
 
     def _register_chat_id(self, msg_text, chat_id):
@@ -73,7 +73,7 @@ class AccountManager:
             self.listening = False
             self._random_pass = None
 
-            verified_chat_ids = AccountManager._get_verified_chats() + [chat_id]
+            verified_chat_ids = self._get_verified_chats() + [chat_id]
             self._save_verified_chat_ids(verified_chat_ids)
 
             self._sender.sendMessage('Chat ID registered successfully!')

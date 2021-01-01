@@ -17,9 +17,10 @@ class CommandParser(telepot.helper.ChatHandler):
 	def __init__(self, *args, **kwargs):
 		email = kwargs.pop('email')
 		password = kwargs.pop('password')
+		verified_chats_file = kwargs.pop('verified_chats_file')
 
 		super(CommandParser, self).__init__(*args, **kwargs)
-		self._account_manager = AccountManager(self.sender, email, password)
+		self._account_manager = AccountManager(self.sender, email, password, verified_chats_file)
 		self._torrent_handler = TorrentHandler(self.sender)
 
 	def on__idle(self, event):
@@ -75,18 +76,22 @@ def run():
 	email = os.getenv('EMAIL_ADD')
 	password = os.getenv('EMAIL_PASS')
 	bot_token = os.getenv('TEL_BOT_TOKEN')
+	verified_chats_file = os.getenv('VERIFIED_CHATS_FILE')
 
 	bot = telepot.DelegatorBot(bot_token, [pave_event_space()(per_chat_id(),
 															  create_open,
 															  CommandParser,
 															  timeout=30,
 															  email=email,
-															  password=password)])
+															  password=password,
+															  verified_chats_file=verified_chats_file)])
+
 	MessageLoop(bot).run_as_thread()
 	print('Listening...')
 
 	while 1:
 		time.sleep(10)
+
 
 if __name__ == '__main__':
 	run()
