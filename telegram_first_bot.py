@@ -40,6 +40,9 @@ class CommandParser(telepot.helper.ChatHandler):
 		if msg_text == '/help':
 			self.sender.sendMessage(f"I can't help yet =/")
 
+		elif msg_text == '/start':
+			self.sender.sendMessage(f"Hi! Welcome to Pi-Bot! For help type /help")
+
 		elif msg_text == '/status':
 			if chat_id_verified:
 				self.sender.sendMessage('User is registered. Can use all commands')
