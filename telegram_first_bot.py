@@ -50,9 +50,9 @@ class CommandParser(telepot.helper.ChatHandler):
 			if chat_id_verified:
 				self.sender.sendMessage('User is registered. Can use all commands')
 			else:
-				self._sender.sendMessage('User is not registered. Please register account using /acm register')
+				self._sender.sendMessage(f'User is not registered. Please register account using {self._account_handler.register_func_caller}')
 
-		elif msg_text == '/acm register':
+		elif msg_text == self._account_handler.register_func_caller:
 			self._account_handler.generate_password(self.chat_id)
 
 		elif self._account_handler.listening:
@@ -75,7 +75,7 @@ class CommandParser(telepot.helper.ChatHandler):
 				else:
 					self.sender.sendMessage(f"Sorry, I don't understand... please type /help for further options")
 			else:
-				self._sender.sendMessage('Permission denied. Please register account using /acm register')
+				self._sender.sendMessage(f'Permission denied. Please register account using {self._account_handler.register_func_caller}')
 
 		else:
 			self.sender.sendMessage(f"Sorry, I don't understand... please type /help for further options")

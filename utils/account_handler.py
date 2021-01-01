@@ -11,6 +11,7 @@ class AccountHandler(Handler):
     def __init__(self, sender: Sender, email: str, password: str, verified_chats_file: str):
         super().__init__(sender)
 
+        self.register_func_caller = '/acm_register'
         self.listening = False
         self._random_pass = None
         self._email_handler = EmailHandler(email, password)
@@ -22,7 +23,7 @@ class AccountHandler(Handler):
 
     @property
     def description(self):
-        return f'Handles torrent related commands. type {self.caller} help for more information'
+        return f'Handles torrent related commands. Type {self.caller}_help for more information'
 
     # Base class overloaded methods
     def run_command(self, msg_text, chat_id=None, *args):

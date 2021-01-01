@@ -24,7 +24,7 @@ class TorrentHandler(Handler):
 
     @property
     def description(self):
-        return f'Handles torrent related commands. type {self.caller} help for more information'
+        return f'Handles torrent related commands. Type {self.caller}_help for more information'
 
     # Base class overloaded methods
     def run_command(self, msg_text, *args):
