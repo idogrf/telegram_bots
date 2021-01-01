@@ -34,24 +34,30 @@ class CommandParser(telepot.helper.ChatHandler):
 			return
 
 		msg_text = msg['text']
+		print(f'Received msg - {msg_text}')
+
+		chat_id_verified = self._account_manager.verify_chat_id(self.chat_id)
 
 		if msg_text == '/help':
 			self.sender.sendMessage(f"I can't help yet =/")
 
 		elif msg_text == '/status':
-			if self._account_manager.verify_chat_id(self.chat_id):
+			if chat_id_verified:
 				self.sender.sendMessage('User is registered. Can use all commands')
 			else:
-				self._sender.sendMessage('Permission denied. Please register account using /register_account')
+				self._sender.sendMessage('User is not registered. Please register account using /acm register')
 
 		elif msg_text == '/acm register':
 			self._account_manager.generate_password()
 
-		elif not self._account_manager.verify_chat_id(self.chat_id):
-			self._sender.sendMessage('Permission denied. Please register account using /register_account')
+		elif self._account_manager.listening:
+			self._account_manager.run_command(msg_text, self.chat_id)
+
+		elif not chat_id_verified:
+			self._sender.sendMessage('Permission denied. Please register account using /acm register')
 			return
 
-		elif msg_text.startswith('/acm') or self._account_manager.listening:
+		elif msg_text.startswith('/acm'):
 			self._account_manager.run_command(msg_text, self.chat_id)
 
 		elif msg_text.startswith('/torrents') or self._torrent_handler.listening:
