@@ -9,13 +9,21 @@ from utils.email_handler import EmailHandler
 class AccountManager:
     def __init__(self, sender: Sender, email: str, password: str):
         self._sender = sender
-        self._verifying = False
+        self.listening = False
         self._random_pass = None
         self._email_handler = EmailHandler(email, password)
 
-    @property
-    def verifying(self):
-        return self._verifying
+    def run_command(self, msg_text, chat_id):
+
+        if self.listening:
+            self._register_chat_id(msg_text, chat_id)
+            return
+
+        command = msg_text.lstrip('/acm').lstrip(' ')
+
+        if command == 'purge':
+            self._purge_chat_ids()
+
 
     @staticmethod
     def _get_verified_chats():
@@ -26,18 +34,19 @@ class AccountManager:
         else:
             return []
 
-    def verify_chat_id(self, chat_id):
+    @staticmethod
+    def verify_chat_id(chat_id):
         chat_id_verified = chat_id in AccountManager._get_verified_chats()
         return chat_id_verified
 
     def generate_password(self):
         self._random_pass = generate_pass(8)
-        self._verifying = True
+        self.listening = True
         print(self._random_pass)
         self._email_handler.send_password(self._random_pass)
         self._sender.sendMessage('Please provide matching password (sent to email)')
 
-    def purge_chat_ids(self):
+    def _purge_chat_ids(self):
         self._save_verified_chat_ids([])
         self._sender.sendMessage('Accounts permissions purged')
 
@@ -46,9 +55,9 @@ class AccountManager:
         with open('verified_chat_ids.txt', 'w') as f:
             json.dump({'chat_ids': verified_chat_ids}, f)
 
-    def register_chat_id(self, msg_text, chat_id):
+    def _register_chat_id(self, msg_text, chat_id):
         if msg_text == self._random_pass:
-            self._verifying = False
+            self.listening = False
             self._random_pass = None
 
             verified_chat_ids = AccountManager._get_verified_chats() + [chat_id]
@@ -56,6 +65,6 @@ class AccountManager:
 
             self._sender.sendMessage('Chat ID registered successfully!')
         else:
-            self._verifying = False
+            self.listening = False
             self._random_pass = None
             self._sender.sendMessage('Password incorrect! Please try again!')

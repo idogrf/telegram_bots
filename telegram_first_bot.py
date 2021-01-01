@@ -23,7 +23,7 @@ class CommandParser(telepot.helper.ChatHandler):
 		self._torrent_handler = TorrentHandler(self.sender)
 
 	def on__idle(self, event):
-		if self._account_manager.verifying:
+		if self._account_manager.listening:
 			self.sender.sendMessage('Time expired. please try again')
 		self.close()
 
@@ -35,46 +35,27 @@ class CommandParser(telepot.helper.ChatHandler):
 
 		msg_text = msg['text']
 
-		if self._account_manager.verifying:
-			self._account_manager.register_chat_id(msg_text, self.chat_id)
-		elif self._torrent_handler.listening:
-			self._torrent_handler.input_param(msg_text)
+		if msg_text == '/help':
+			self.sender.sendMessage(f"I can't help yet =/")
 
-		elif msg_text.startswith('/'):
-			if msg_text == '/register_account':
-				self._account_manager.generate_password()
-
-			elif msg_text == '/help':
-				self.sender.sendMessage(f"I can't help yet =/")
-
-			elif msg_text == '/status':
-				if self._account_manager.verify_chat_id(self.chat_id):
-					self.sender.sendMessage('User is registered. Can use all commands')
-				else:
-					self._sender.sendMessage('Permission denied. Please register account using /register_account')
-
-			elif not self._account_manager.verify_chat_id(self.chat_id):
-				self._sender.sendMessage('Permission denied. Please register account using /register_account')
-				pass
-
-			elif msg_text == '/purge_accounts':
-				self._account_manager.purge_chat_ids()
-
-			elif msg_text.startswith('/torrents'):
-				command = msg_text.lstrip('/torrents').lstrip(' ')
-				if command == 'refresh':
-					self._torrent_handler.refresh_torrents()
-				elif command == 'purge':
-					self._torrent_handler.purge_dirs()
-				elif command == 'download':
-					self._torrent_handler.download_torrent()
-				elif command == 'stop all':
-					self._torrent_handler.stop_all_torrents()
-				else:
-					self.sender.sendMessage(f'Command {command} not found')
-
+		elif msg_text == '/status':
+			if self._account_manager.verify_chat_id(self.chat_id):
+				self.sender.sendMessage('User is registered. Can use all commands')
 			else:
-				self.sender.sendMessage(f'Command {msg_text} not found')
+				self._sender.sendMessage('Permission denied. Please register account using /register_account')
+
+		elif msg_text == '/acm register':
+			self._account_manager.generate_password()
+
+		elif not self._account_manager.verify_chat_id(self.chat_id):
+			self._sender.sendMessage('Permission denied. Please register account using /register_account')
+			return
+
+		elif msg_text.startswith('/acm') or self._account_manager.listening:
+			self._account_manager.run_command(msg_text, self.chat_id)
+
+		elif msg_text.startswith('/torrents') or self._torrent_handler.listening:
+			self._torrent_handler.run_command(msg_text)
 
 		elif msg_text.lower().startswith(('hi', 'hello', 'hey')):
 			self.sender.sendMessage(f"Hi there! I'm PI bot :) how can I help?")

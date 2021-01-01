@@ -15,13 +15,46 @@ class TorrentHandler:
         self._input_messages = []
         self._run_func = None
 
-    def refresh_torrents(self):
+    def run_command(self, msg_text):
+
+        if self.listening:
+            self._input_param(msg_text)
+            return
+
+        command = msg_text.lstrip('/torrents').lstrip(' ')
+
+        if command == 'refresh':
+            self._refresh_torrents()
+        elif command == 'purge':
+            self._purge_dirs()
+        elif command == 'download':
+            self._download_torrent()
+        elif command == 'stop all':
+            self._stop_all_torrents()
+        else:
+            self.sender.sendMessage(f'Command {command} not found')
+
+    def _input_param(self, msg):
+        self._input_params.append(msg)
+        self._input_length -= 1
+
+        if self._input_length == 0:
+            self._run_func()
+            self.listening = False
+            self._input_length = None
+            self._input_params = []
+            self._input_messages = []
+            self._run_func = None
+        else:
+            self._sender.sendMessage(self._input_messages[-self._input_length])
+
+    def _refresh_torrents(self):
         self._sender.sendMessage('Refreshing torrents list.. please wait...')
         output = run_torrent_download()
         self._sender.sendMessage('Finished refreshing torrents. Results - ')
         self._sender.sendMessage(output)
 
-    def purge_dirs(self):
+    def _purge_dirs(self):
         self._sender.sendMessage('Removing empty dirs')
         deleted_dirs = delete_small_dirs()
         if len(deleted_dirs) == 0:
@@ -49,21 +82,7 @@ class TorrentHandler:
             self._sender.sendMessage(f'Failed')
             self._sender.sendMessage(f'Error message - {output}')
 
-    def input_param(self, msg):
-        self._input_params.append(msg)
-        self._input_length -= 1
-
-        if self._input_length == 0:
-            self._run_func()
-            self.listening = False
-            self._input_length = None
-            self._input_params = []
-            self._input_messages = []
-            self._run_func = None
-        else:
-            self._sender.sendMessage(self._input_messages[-self._input_length])
-
-    def download_torrent(self):
+    def _download_torrent(self):
         self.listening = True
         self._input_length = 2
         self._input_params = []
@@ -72,7 +91,7 @@ class TorrentHandler:
 
         self._sender.sendMessage(self._input_messages[-self._input_length])
 
-    def stop_all_torrents(self):
+    def _stop_all_torrents(self):
         self._sender.sendMessage('Stopping all torrents')
         self._send_to_transmission(['--torrent', 'all', '--stop'])
 
