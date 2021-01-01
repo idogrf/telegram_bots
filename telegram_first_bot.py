@@ -35,6 +35,7 @@ class CommandParser(telepot.helper.ChatHandler):
 
 		msg_text = msg['text']
 		print(f'Received msg - {msg_text}')
+		print(self.chat_id)
 
 		chat_id_verified = self._account_manager.verify_chat_id(self.chat_id)
 
@@ -48,7 +49,7 @@ class CommandParser(telepot.helper.ChatHandler):
 				self._sender.sendMessage('User is not registered. Please register account using /acm register')
 
 		elif msg_text == '/acm register':
-			self._account_manager.generate_password()
+			self._account_manager.generate_password(self.chat_id)
 
 		elif self._account_manager.listening:
 			self._account_manager.run_command(msg_text, self.chat_id)

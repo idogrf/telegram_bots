@@ -3,7 +3,7 @@ import subprocess
 from telepot.helper import Sender
 
 sys.path.append('/home/pi/projects/cronjobs')
-from download_torrents import run_torrent_download, delete_small_dirs
+from download_torrents import run_torrent_download, delete_small_dirs, get_free_usb_space, get_free_root_space
 
 
 class TorrentHandler:
@@ -23,7 +23,9 @@ class TorrentHandler:
 
         command = msg_text.lstrip('/torrents').lstrip(' ')
 
-        if command == 'refresh':
+        if command == 'help':
+            self._get_help()
+        elif command == 'refresh':
             self._refresh_torrents()
         elif command == 'purge':
             self._purge_dirs()
@@ -31,8 +33,21 @@ class TorrentHandler:
             self._download_torrent()
         elif command == 'stop all':
             self._stop_all_torrents()
+        elif command == 'free space':
+            self._check_free_space()
         else:
-            self.sender.sendMessage(f'Command {command} not found')
+            self._sender.sendMessage('Invalid command')
+            self._get_help()
+
+    def _get_help(self):
+        help_txt = 'Torrents module available commands - \n'
+        help_txt += '   - refresh - Refresh torrents RSS feed\n'
+        help_txt += '   - download - Download new torrent\n'
+        help_txt += '   - purge - Delete empty torrent folders\n'
+        help_txt += '   - stop all - Stop all active torrents\n'
+        help_txt += '   - free space - Get free space on device\n'
+        self._sender.sendMessage(help_txt)
+
 
     def _input_param(self, msg):
         self._input_params.append(msg)
@@ -95,6 +110,11 @@ class TorrentHandler:
         self._sender.sendMessage('Stopping all torrents')
         self._send_to_transmission(['--torrent', 'all', '--stop'])
 
+    def _check_free_space(self):
+        usb_space = get_free_usb_space()
+        root_space = get_free_root_space()
+        self._sender.sendMessage(f'Free disk space on USB - {usb_space:.1f}GB')
+        self._sender.sendMessage(f'Free disk space on root - {root_space:.1f}GB')
 
 
 
