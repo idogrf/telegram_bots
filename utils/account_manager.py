@@ -6,7 +6,7 @@ from utils.utils import generate_pass
 from utils.email_handler import EmailHandler
 
 
-class Verifier:
+class AccountManager:
     def __init__(self, sender: Sender, email: str, password: str):
         self._sender = sender
         self._verifying = False
@@ -27,7 +27,7 @@ class Verifier:
             return []
 
     def verify_chat_id(self, chat_id):
-        chat_id_verified = chat_id in Verifier._get_verified_chats()
+        chat_id_verified = chat_id in AccountManager._get_verified_chats()
         return chat_id_verified
 
     def generate_password(self):
@@ -51,7 +51,7 @@ class Verifier:
             self._verifying = False
             self._random_pass = None
 
-            verified_chat_ids = Verifier._get_verified_chats() + [chat_id]
+            verified_chat_ids = AccountManager._get_verified_chats() + [chat_id]
             self._save_verified_chat_ids(verified_chat_ids)
 
             self._sender.sendMessage('Chat ID registered successfully!')

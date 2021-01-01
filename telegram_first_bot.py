@@ -6,7 +6,7 @@ import telepot
 from telepot.loop import MessageLoop
 from telepot.delegate import pave_event_space, per_chat_id, create_open
 
-from utils.verifier import Verifier
+from utils.account_manager import AccountManager
 from utils.torrent_handler import TorrentHandler
 
 sys.path.append('/home/pi/projects/cronjobs')
@@ -19,11 +19,11 @@ class CommandParser(telepot.helper.ChatHandler):
 		password = kwargs.pop('password')
 
 		super(CommandParser, self).__init__(*args, **kwargs)
-		self._verifier = Verifier(self.sender, email, password)
+		self._account_manager = AccountManager(self.sender, email, password)
 		self._torrent_handler = TorrentHandler(self.sender)
 
 	def on__idle(self, event):
-		if self._verifier.verifying:
+		if self._account_manager.verifying:
 			self.sender.sendMessage('Time expired. please try again')
 		self.close()
 
@@ -35,30 +35,30 @@ class CommandParser(telepot.helper.ChatHandler):
 
 		msg_text = msg['text']
 
-		if self._verifier.verifying:
-			self._verifier.register_chat_id(msg_text, self.chat_id)
+		if self._account_manager.verifying:
+			self._account_manager.register_chat_id(msg_text, self.chat_id)
 		elif self._torrent_handler.listening:
 			self._torrent_handler.input_param(msg_text)
 
 		elif msg_text.startswith('/'):
 			if msg_text == '/register_account':
-				self._verifier.generate_password()
+				self._account_manager.generate_password()
 
 			elif msg_text == '/help':
 				self.sender.sendMessage(f"I can't help yet =/")
 
 			elif msg_text == '/status':
-				if self._verifier.verify_chat_id(self.chat_id):
+				if self._account_manager.verify_chat_id(self.chat_id):
 					self.sender.sendMessage('User is registered. Can use all commands')
 				else:
 					self._sender.sendMessage('Permission denied. Please register account using /register_account')
 
-			elif not self._verifier.verify_chat_id(self.chat_id):
+			elif not self._account_manager.verify_chat_id(self.chat_id):
 				self._sender.sendMessage('Permission denied. Please register account using /register_account')
 				pass
 
 			elif msg_text == '/purge_accounts':
-				self._verifier.purge_chat_ids()
+				self._account_manager.purge_chat_ids()
 
 			elif msg_text.startswith('/torrents'):
 				command = msg_text.lstrip('/torrents').lstrip(' ')
