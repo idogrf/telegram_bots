@@ -28,12 +28,19 @@ class AccountHandler(Handler):
     def run_command(self, msg_text, chat_id=None, *args):
 
         if self.listening:
-            self._run_command_register(msg_text, chat_id)
+            self._register_account(msg_text, chat_id)
             return
 
-        self._process_command(msg_text)
+        self._process_command(in_command=msg_text)
 
-    def _run_command_register(self, msg_text, chat_id):
+    # Run command methods
+    def _run_command_purge(self):
+        """ Purge all user accounts """
+        self._save_verified_chat_ids([])
+        self._sender.sendMessage('Accounts permissions purged')
+
+    # Class helper methods
+    def _register_account(self, msg_text, chat_id):
         """ Register user account for elevated permissions """
         if msg_text == self._random_pass:
             self.listening = False
@@ -47,11 +54,6 @@ class AccountHandler(Handler):
             self.listening = False
             self._random_pass = None
             self._sender.sendMessage('Password incorrect! Please try again!')
-
-    def _run_command_purge(self):
-        """ Purge all user accounts """
-        self._save_verified_chat_ids([])
-        self._sender.sendMessage('Accounts permissions purged')
 
     def _get_verified_chats(self):
         if os.path.exists(self._verified_chats_file):
