@@ -55,18 +55,24 @@ class CommandParser(telepot.helper.ChatHandler):
 		elif self._account_manager.listening:
 			self._account_manager.run_command(msg_text, self.chat_id)
 
-		elif not chat_id_verified:
-			self._sender.sendMessage('Permission denied. Please register account using /acm register')
-			return
-
-		elif msg_text.startswith('/acm'):
-			self._account_manager.run_command(msg_text, self.chat_id)
-
-		elif msg_text.startswith('/torrents') or self._torrent_handler.listening:
+		elif self._torrent_handler.listening:
 			self._torrent_handler.run_command(msg_text)
 
 		elif msg_text.lower().startswith(('hi', 'hello', 'hey')):
 			self.sender.sendMessage(f"Hi there! I'm PI bot :) how can I help?")
+
+		elif msg_text.startswith('/'):
+			if chat_id_verified:
+				if msg_text.startswith('/acm'):
+					self._account_manager.run_command(msg_text, self.chat_id)
+
+				elif msg_text.startswith('/torrents'):
+					self._torrent_handler.run_command(msg_text)
+
+				else:
+					self.sender.sendMessage(f"Sorry, I don't understand... please type /help for further options")
+			else:
+				self._sender.sendMessage('Permission denied. Please register account using /acm register')
 
 		else:
 			self.sender.sendMessage(f"Sorry, I don't understand... please type /help for further options")
