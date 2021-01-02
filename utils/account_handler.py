@@ -8,6 +8,7 @@ from utils.email_utils import EmailHandler
 
 
 class AccountHandler(Handler):
+    """ Handles account related commands """
     def __init__(self, sender: Sender, email: str, password: str, verified_chats_file: str):
         super().__init__(sender)
 
@@ -20,10 +21,6 @@ class AccountHandler(Handler):
     @property
     def caller(self):
         return '/acm'
-
-    @property
-    def description(self):
-        return f'Handles torrent related commands. Type {self.caller}_help for more information'
 
     # Base class overloaded methods
     def run_command(self, msg_text, chat_id=None, *args):

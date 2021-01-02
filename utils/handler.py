@@ -20,7 +20,7 @@ class Handler:
 
     @property
     def description(self):
-        raise NotImplemented
+        return f'{self.__class__.__doc__}. Type {self.caller}_help for more info'
 
     def run_command(self, msg_text, *args):
         self._process_command(msg_text)
@@ -30,8 +30,7 @@ class Handler:
 
         commands = [command for command in self._commands if command['command'] == in_command]
         command = commands[0] if len(commands)>0 else None
-        if command is None:
-            self._sender.sendMessage('Invalid command')
+        if len(in_command) == 0 or command is None:
             self._run_command_help()
         else:
             command['function']()

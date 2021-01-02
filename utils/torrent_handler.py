@@ -9,6 +9,7 @@ from utils.handler import Handler
 
 
 class TorrentHandler(Handler):
+    """ Handles torrent related commands """
     def __init__(self, sender: Sender):
         super().__init__(sender)
 
@@ -21,10 +22,6 @@ class TorrentHandler(Handler):
     @property
     def caller(self):
         return '/torrents'
-
-    @property
-    def description(self):
-        return f'Handles torrent related commands. Type {self.caller}_help for more information'
 
     # Base class overloaded methods
     def run_command(self, msg_text, *args):
