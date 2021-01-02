@@ -67,7 +67,7 @@ class AccountHandler(Handler):
 
     def generate_password(self, chat_id):
         if not self.verify_chat_id(chat_id):
-            self._random_pass = generate_pass(16)
+            self._random_pass = generate_pass(6)
             self.listening = True
             print(self._random_pass)
             self._email_handler.send_password(self._random_pass)

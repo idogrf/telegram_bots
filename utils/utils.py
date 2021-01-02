@@ -5,8 +5,10 @@ import random
 def generate_pass(pass_length):
     letters = string.ascii_letters
     numbers = string.digits
+    punctuation = string.punctuation
 
-    passable = list(f'{letters}{numbers}')
+    # passable = list(f'{letters}{numbers}{punctuation}')
+    passable = list(f'{numbers}')
     random.shuffle(passable)
 
     random_password = random.choices(passable, k=pass_length)
