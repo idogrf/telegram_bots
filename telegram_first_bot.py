@@ -44,7 +44,7 @@ class CommandParser(telepot.helper.ChatHandler):
 			self._get_help()
 
 		elif msg_text == '/start':
-			self.sender.sendMessage(f"Hi! Welcome to Pi-Bot! For help type /help")
+			self.sender.sendMessage(f"Hi! Welcome to Pi-Bot! How can I /help")
 
 		elif msg_text == '/status':
 			if chat_id_verified:
@@ -62,7 +62,7 @@ class CommandParser(telepot.helper.ChatHandler):
 			self._torrent_handler.run_command(msg_text)
 
 		elif msg_text.lower().startswith(('hi', 'hello', 'hey')):
-			self.sender.sendMessage(f"Hi there! I'm PI bot :) how can I help?")
+			self.sender.sendMessage(f"Hi there! I'm PI bot :) how can I /help?")
 
 		elif msg_text.startswith(tuple(self._callers)):
 			if chat_id_verified:
