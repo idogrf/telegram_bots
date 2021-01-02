@@ -8,8 +8,11 @@ class Handler:
 
         methods = inspect.getmembers(self, predicate=inspect.ismethod)
         relevant_methods = [method for method in methods if method[0].startswith('_run_command')]
-        functions = [method[1] for method in relevant_methods]
-        commands = [method[0].replace('_run_command_', '') for method in relevant_methods]
+        help_method = [method for method in relevant_methods if method[0] == '_run_command_help'][0]
+        help_method = relevant_methods.pop(relevant_methods.index(help_method))
+
+        functions = [help_method[1]] + [method[1] for method in relevant_methods]
+        commands = [help_method[0].replace('_run_command_', '')] + [method[0].replace('_run_command_', '') for method in relevant_methods]
         docs = [function.__doc__ for function in functions]
         self._commands = [{'command': command, 'function': function, 'doc': doc}
                           for command, function, doc in zip(commands, functions, docs)]
