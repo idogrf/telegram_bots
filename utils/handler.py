@@ -12,7 +12,8 @@ class Handler:
         help_method = relevant_methods.pop(relevant_methods.index(help_method))
 
         functions = [help_method[1]] + [method[1] for method in relevant_methods]
-        commands = [help_method[0].replace('_run_command_', '')] + [method[0].replace('_run_command_', '') for method in relevant_methods]
+        commands = [help_method[0].replace('_run_command_', '')] + [method[0].replace('_run_command_', '') for method in
+                                                                    relevant_methods]
         docs = [function.__doc__ for function in functions]
         self._commands = [{'command': command, 'function': function, 'doc': doc}
                           for command, function, doc in zip(commands, functions, docs)]
@@ -32,7 +33,7 @@ class Handler:
         in_command = in_command.replace(f'{self.caller}_', '').lstrip(' ')
 
         commands = [command for command in self._commands if command['command'] == in_command]
-        command = commands[0] if len(commands)>0 else None
+        command = commands[0] if len(commands) > 0 else None
         if len(in_command) == 0 or command is None:
             self._run_command_help()
         else:

@@ -4,13 +4,15 @@ from telepot.helper import Sender
 
 sys.path.append('/home/pi/projects/repositories/torrent_tools')
 from torrent_tools.data_operations import delete_small_dirs, get_free_root_space, get_free_media_space
-from torrent_tools.torrent_operations import refresh_rss_torrents, download_torrent, stop_all_torrents, start_all_torrents, list_torrents
+from torrent_tools.torrent_operations import refresh_rss_torrents, download_torrent, stop_all_torrents, \
+    start_all_torrents, list_torrents
 
 from utils.handler import Handler
 
 
 class TorrentHandler(Handler):
     """ Handles torrent related commands """
+
     def __init__(self, sender: Sender):
         super().__init__(sender)
 
@@ -99,4 +101,3 @@ class TorrentHandler(Handler):
             self._run_func = None
         else:
             self._sender.sendMessage(self._input_messages[-self._input_length])
-
