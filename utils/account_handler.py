@@ -9,13 +9,14 @@ from utils.email_utils import EmailHandler
 
 class AccountHandler(Handler):
     """ Handles account related commands """
-    def __init__(self, sender: Sender, email: str, password: str, verified_chats_file: str):
+
+    def __init__(self, sender: Sender, email: str, password: str, verified_chats_file: str, msg_info):
         super().__init__(sender)
 
         self.register_func_caller = '/acm_register'
         self.listening = False
         self._random_pass = None
-        self._email_handler = EmailHandler(email, password)
+        self._email_handler = EmailHandler(email, password, msg_info)
         self._verified_chats_file = verified_chats_file
 
     @property

@@ -4,9 +4,10 @@ from email.mime.multipart import MIMEMultipart
 
 
 class EmailHandler:
-    def __init__(self, email, password):
+    def __init__(self, email, password, msg_info):
         self._email = email
         self._password = password
+        self._msg_info = msg_info
         self._smtp = None
 
     @property
@@ -26,6 +27,8 @@ class EmailHandler:
         msg['to'] = self._email
         msg['Subject'] = "Your PI Bot token"
 
-        msg.attach(MIMEText(password, 'plain'))
+        msg_text = f"User: {self._msg_info['sending_user']} \nChat start time: {self._msg_info['chat_start_time']} \nToken: {password}"
+
+        msg.attach(MIMEText(msg_text, 'plain'))
 
         self.smtp.send_message(msg)

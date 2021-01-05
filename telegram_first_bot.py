@@ -17,11 +17,13 @@ class CommandParser(telepot.helper.ChatHandler):
 		verified_chats_file = kwargs.pop('verified_chats_file')
 
 		super(CommandParser, self).__init__(*args, **kwargs)
-		self._account_handler = AccountHandler(self.sender, email, password, verified_chats_file)
 		self._torrent_handler = TorrentHandler(self.sender)
 
 		self._handlers = [self._account_handler, self._torrent_handler]
 		self._callers = [handler.caller for handler in self._handlers]
+        msg_info = {'sending_user': args[0][1]['from']['first_name'] + ' ' + args[0][1]['from']['last_name'],
+                    'chat_start_time': datetime.datetime.fromtimestamp(args[0][1]['date']).isoformat()}
+        self._account_handler = AccountHandler(self.sender, email, password, verified_chats_file, msg_info)
 
 	def on__idle(self, event):
 		if self._account_handler.listening:
