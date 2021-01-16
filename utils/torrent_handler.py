@@ -40,7 +40,7 @@ class TorrentHandler(Handler):
         self._sender.sendMessage('Refreshing torrents list.. please wait...')
         response = refresh_rss_torrents()
         self._sender.sendMessage('Finished refreshing torrents. Results - ')
-        self._sender.sendMessage(response)
+        self._sender.sendMessage(response[1])
 
     def _run_command_download_torrent(self):
         """ Download new torrent """
