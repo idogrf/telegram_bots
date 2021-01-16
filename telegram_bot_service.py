@@ -8,6 +8,7 @@ from telepot.delegate import pave_event_space, per_chat_id, create_open
 
 from utils.account_handler import AccountHandler
 from utils.torrent_handler import TorrentHandler
+from telegram_subscribers_update import UpdaterBot
 
 
 class CommandParser(telepot.helper.ChatHandler):
@@ -27,6 +28,7 @@ class CommandParser(telepot.helper.ChatHandler):
 
         self._handlers = [self._account_handler, self._torrent_handler]
         self._callers = [handler.caller for handler in self._handlers]
+        self._sending_user = msg_info['sending_user']
 
     def on__idle(self, event):
         if self._account_handler.listening:
@@ -44,6 +46,9 @@ class CommandParser(telepot.helper.ChatHandler):
         print(self.chat_id)
 
         chat_id_verified = self._account_handler.verify_chat_id(self.chat_id)
+        if not chat_id_verified:
+            updater_msg = f'Unknown user - {self._sending_user}; Message = {msg_text}'
+            UpdaterBot(self.bot).update_subscribers(updater_msg)
 
         if msg_text == '/help':
             self._get_help()

@@ -91,6 +91,7 @@ class AccountHandler(Handler):
             json.dump({'chat_ids': verified_chat_ids}, f)
 
     def _save_subscribed_chat_ids(self, subscribed_chat_ids):
+        subscribed_chat_ids = subscribed_chat_ids if type(subscribed_chat_ids) == list else [subscribed_chat_ids]
         if not os.path.exists(os.path.dirname(self._subscribed_chats_file)):
             os.makedirs(os.path.dirname(self._subscribed_chats_file))
         with open(self._subscribed_chats_file, 'w') as f:
