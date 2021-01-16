@@ -108,6 +108,7 @@ def run():
                                                               verified_chats_file=verified_chats_file)])
 
     MessageLoop(bot).run_as_thread()
+
     print('Listening...')
 
     while 1:
