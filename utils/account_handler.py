@@ -10,7 +10,8 @@ from utils.email_utils import EmailHandler
 class AccountHandler(Handler):
     """ Handles account related commands """
 
-    def __init__(self, sender: Sender, email: str, password: str, verified_chats_file: str, msg_info):
+    def __init__(self, sender: Sender, email: str, password: str, verified_chats_file: str,
+                 subscribed_chats_file: str, chat_id, msg_info):
         super().__init__(sender)
 
         self.register_func_caller = '/acm_register'
@@ -18,6 +19,8 @@ class AccountHandler(Handler):
         self._random_pass = None
         self._email_handler = EmailHandler(email, password, msg_info)
         self._verified_chats_file = verified_chats_file
+        self._subscribed_chats_file = subscribed_chats_file
+        self._chat_id = chat_id
 
     @property
     def caller(self):
@@ -37,6 +40,11 @@ class AccountHandler(Handler):
         """ Purge all user accounts """
         self._save_verified_chat_ids([])
         self._sender.sendMessage('Accounts permissions purged')
+
+    def _run_command_subscribe(self):
+        """ Subscribe user for updates """
+        self._save_subscribed_chat_ids(self._chat_id)
+        self._sender.sendMessage('Account Subscribed')
 
     # Class helper methods
     def _register_account(self, msg_text, chat_id):
@@ -81,3 +89,9 @@ class AccountHandler(Handler):
             os.makedirs(os.path.dirname(self._verified_chats_file))
         with open(self._verified_chats_file, 'w') as f:
             json.dump({'chat_ids': verified_chat_ids}, f)
+
+    def _save_subscribed_chat_ids(self, subscribed_chat_ids):
+        if not os.path.exists(os.path.dirname(self._subscribed_chats_file)):
+            os.makedirs(os.path.dirname(self._subscribed_chats_file))
+        with open(self._subscribed_chats_file, 'w') as f:
+            json.dump({'chat_ids': subscribed_chat_ids}, f)

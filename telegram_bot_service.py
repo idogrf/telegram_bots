@@ -15,12 +15,14 @@ class CommandParser(telepot.helper.ChatHandler):
         email = kwargs.pop('email')
         password = kwargs.pop('password')
         verified_chats_file = kwargs.pop('verified_chats_file')
+        subscribed_chats_file = kwargs.pop('subscribed_chats_file')
 
         super(CommandParser, self).__init__(*args, **kwargs)
 
         msg_info = {'sending_user': args[0][1]['from']['first_name'] + ' ' + args[0][1]['from']['last_name'],
                     'chat_start_time': datetime.datetime.fromtimestamp(args[0][1]['date']).isoformat()}
-        self._account_handler = AccountHandler(self.sender, email, password, verified_chats_file, msg_info)
+        self._account_handler = AccountHandler(self.sender, email, password, verified_chats_file, subscribed_chats_file,
+                                               self.chat_id, msg_info)
         self._torrent_handler = TorrentHandler(self.sender)
 
         self._handlers = [self._account_handler, self._torrent_handler]
@@ -98,6 +100,7 @@ def run():
     password = os.getenv('EMAIL_PASS')
     bot_token = os.getenv('TEL_BOT_TOKEN')
     verified_chats_file = os.getenv('VERIFIED_CHATS_FILE')
+    subscribed_chats_file = os.getenv('SUBSCRIBED_CHATS_FILE')
 
     bot = telepot.DelegatorBot(bot_token, [pave_event_space()(per_chat_id(),
                                                               create_open,
@@ -105,7 +108,8 @@ def run():
                                                               timeout=30,
                                                               email=email,
                                                               password=password,
-                                                              verified_chats_file=verified_chats_file)])
+                                                              verified_chats_file=verified_chats_file,
+                                                              subscribed_chats_file=subscribed_chats_file)])
 
     MessageLoop(bot).run_as_thread()
 
