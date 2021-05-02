@@ -31,7 +31,7 @@ class CommandParser(telepot.helper.ChatHandler):
         self._sending_user = msg_info['sending_user']
 
     def on__idle(self, event):
-        if self._account_handler.listening:
+        if self._account_handler.listening or self._torrent_handler.listening:
             self.sender.sendMessage('Time expired. please try again')
         self.close()
 
